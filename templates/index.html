@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Work Handler</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body { background: #F0F4FF; min-height: 100vh; }
+
+        /* TOP NAV */
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+        }
+        .navbar-logo { font-size: 1.5rem; }
+        .navbar-title { font-size: 1.1rem; font-weight: 700; color: #1E293B; }
+        .navbar-sub { font-size: 0.78rem; color: #94A3B8; margin-left: 4px; }
+        .navbar-badge {
+            margin-left: auto;
+            background: #EEF2FF;
+            color: #4F46E5;
+            border: 1px solid #C7D2FE;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* MAIN LAYOUT */
+        .main {
+            display: flex;
+            max-width: 1100px;
+            margin: 32px auto;
+            gap: 24px;
+            padding: 0 24px;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 220px;
+            flex-shrink: 0;
+        }
+        .sidebar-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #94A3B8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+            padding-left: 4px;
+        }
+        .tool-btn {
+            width: 100%;
+            background: white;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        .tool-btn:hover { border-color: #4F46E5; background: #F8F9FF; }
+        .tool-btn.active {
+            background: #4F46E5;
+            border-color: #4F46E5;
+        }
+        .tool-btn.active .tool-name { color: white; }
+        .tool-btn.active .tool-desc { color: rgba(255,255,255,0.7); }
+        .tool-icon { font-size: 1.3rem; }
+        .tool-name { font-size: 0.88rem; font-weight: 600; color: #1E293B; }
+        .tool-desc { font-size: 0.75rem; color: #94A3B8; margin-top: 2px; }
+
+        /* CONTENT */
+        .content { flex: 1; }
+
+        .content-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+            border: 1px solid #E2E8F0;
+            margin-bottom: 20px;
+        }
+
+        .content-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .content-icon { font-size: 1.8rem; }
+        .content-title { font-size: 1.1rem; font-weight: 700; color: #1E293B; }
+        .content-sub { font-size: 0.8rem; color: #94A3B8; margin-top: 2px; }
+
+        /* TEXTAREA */
+        .input-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+            display: block;
+        }
+        textarea {
+            width: 100%;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 0.88rem;
+            color: #334155;
+            resize: vertical;
+            outline: none;
+            min-height: 120px;
+            transition: border 0.2s;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+        }
+        textarea:focus { border-color: #4F46E5; }
+        textarea::placeholder { color: #CBD5E1; }
+
+        /* BUTTON */
+        .run-btn {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 13px 28px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 14px;
+            box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .run-btn:hover { background: #4338CA; transform: translateY(-1px); }
+        .run-btn:disabled { background: #A5B4FC; cursor: not-allowed; transform: none; }
+
+        /* RESULT */
+        .result-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+            border: 1px solid #E2E8F0;
+            display: none;
+        }
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .result-title { font-size: 1rem; font-weight: 700; color: #1E293B; }
+        .copy-btn {
+            background: #F1F5F9;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: #E2E8F0; }
+
+        #result-content {
+            color: #334155;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        /* LOADER */
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 32px;
+        }
+        .spinner {
+            width: 36px; height: 36px;
+            border: 3px solid #E2E8F0;
+            border-top: 3px solid #4F46E5;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+        .loader p { color: #94A3B8; font-size: 0.88rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* STATS */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #E2E8F0;
+            text-align: center;
+        }
+        .stat-icon { font-size: 1.5rem; margin-bottom: 8px; }
+        .stat-value { font-size: 1.4rem; font-weight: 700; color: #1E293B; }
+        .stat-label { font-size: 0.78rem; color: #94A3B8; margin-top: 2px; }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="navbar-logo">🏢</div>
+        <div>
+            <span class="navbar-title">Admin Work Handler</span>
+            <span class="navbar-sub">AI-Powered Office Assistant</span>
+        </div>
+        <div class="navbar-badge">✦ AI Powered</div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-label">Tools</div>
+
+            <button class="tool-btn active" onclick="selectTool('tasks', this)">
+                <span class="tool-icon">✅</span>
+                <div>
+                    <div class="tool-name">Task Manager</div>
+                    <div class="tool-desc">Organize & prioritize</div>
+                </div>
+            </button>
+
+            <button class="tool-btn" onclick="selectTool('email', this)">
+                <span class="tool-icon">📧</span>
+                <div>
+                    <div class="tool-name">Email Writer</div>
+                    <div class="tool-desc">Professional emails</div>
+                </div>
+            </button>
+
+            <button class="tool-btn" onclick="selectTool('report', this)">
+                <span class="tool-icon">📊</span>
+                <div>
+                    <div class="tool-name">Report Generator</div>
+                    <div class="tool-desc">Structured reports</div>
+                </div>
+            </button>
+
+            <button class="tool-btn" onclick="selectTool('meeting', this)">
+                <span class="tool-icon">🗓️</span>
+                <div>
+                    <div class="tool-name">Meeting Summary</div>
+                    <div class="tool-desc">Summarize notes</div>
+                </div>
+            </button>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- STATS -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-icon">🤖</div>
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">AI Tools</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-value">Fast</div>
+                    <div class="stat-label">Response Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✨</div>
+                    <div class="stat-value">Pro</div>
+                    <div class="stat-label">Quality Output</div>
+                </div>
+            </div>
+
+            <!-- INPUT CARD -->
+            <div class="content-card">
+                <div class="content-header">
+                    <span class="content-icon" id="tool-icon">✅</span>
+                    <div>
+                        <div class="content-title" id="tool-title">Task Manager</div>
+                        <div class="content-sub" id="tool-sub">Enter your tasks and AI will organize them</div>
+                    </div>
+                </div>
+
+                <label class="input-label" id="input-label">Enter your tasks (one per line or comma separated):</label>
+                <textarea id="userInput" placeholder="e.g. Write project report, Send emails to clients, Prepare presentation, Review budget..."></textarea>
+
+                <button class="run-btn" id="runBtn" onclick="processInput()">
+                    <span>⚡</span> Generate
+                </button>
+            </div>
+
+            <!-- LOADER -->
+            <div class="loader" id="loader">
+                <div class="spinner"></div>
+                <p>AI is working on it...</p>
+            </div>
+
+            <!-- RESULT -->
+            <div class="result-card" id="resultCard">
+                <div class="result-header">
+                    <div class="result-title">📄 Result</div>
+                    <button class="copy-btn" onclick="copyResult()">📋 Copy</button>
+                </div>
+                <div id="result-content"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let currentTool = 'tasks';
+
+        const toolConfig = {
+            tasks: {
+                icon: '✅',
+                title: 'Task Manager',
+                sub: 'Enter your tasks and AI will organize them',
+                label: 'Enter your tasks (one per line or comma separated):',
+                placeholder: 'e.g. Write project report, Send emails to clients, Prepare presentation, Review budget...'
+            },
+            email: {
+                icon: '📧',
+                title: 'Email Writer',
+                sub: 'Describe the email you need and AI will write it',
+                label: 'Describe the email you need:',
+                placeholder: 'e.g. Write a professional email to client apologizing for delay in project delivery...'
+            },
+            report: {
+                icon: '📊',
+                title: 'Report Generator',
+                sub: 'Provide topic or data and AI will create a report',
+                label: 'Enter report topic or data:',
+                placeholder: 'e.g. Monthly sales report for June 2026. Sales increased by 15%. New clients: 12. Revenue: Rs 500,000...'
+            },
+            meeting: {
+                icon: '🗓️',
+                title: 'Meeting Summary',
+                sub: 'Paste your meeting notes and AI will summarize',
+                label: 'Paste your meeting notes:',
+                placeholder: 'e.g. Meeting with team on 28 June. Discussed project timeline. John will handle design. Sara will write content. Deadline is 5 July...'
+            }
+        };
+
+        function selectTool(tool, btn) {
+            currentTool = tool;
+            
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const config = toolConfig[tool];
+            document.getElementById('tool-icon').textContent = config.icon;
+            document.getElementById('tool-title').textContent = config.title;
+            document.getElementById('tool-sub').textContent = config.sub;
+            document.getElementById('input-label').textContent = config.label;
+            document.getElementById('userInput').placeholder = config.placeholder;
+            document.getElementById('userInput').value = '';
+            document.getElementById('resultCard').style.display = 'none';
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        async function processInput() {
+            const input = document.getElementById('userInput').value.trim();
+            if (!input) { alert('Please enter some input first!'); return; }
+
+            const btn = document.getElementById('runBtn');
+            const loader = document.getElementById('loader');
+            const resultCard = document.getElementById('resultCard');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Processing...';
+            loader.style.display = 'block';
+            resultCard.style.display = 'none';
+
+            try {
+                const res = await fetch('/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tool: currentTool, input })
+                });
+                const data = await res.json();
+
+                loader.style.display = 'none';
+                resultCard.style.display = 'block';
+                document.getElementById('result-content').textContent = data.result;
+                resultCard.scrollIntoView({ behavior: 'smooth' });
+            } catch (e) {
+                loader.style.display = 'none';
+                alert('Error! Please try again.');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<span>⚡</span> Generate';
+        }
+
+        function copyResult() {
+            const text = document.getElementById('result-content').textContent;
+            navigator.clipboard.writeText(text);
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = '✅ Copied!';
+            setTimeout(() => btn.textContent = '📋 Copy', 2000);
+        }
+    </script>
+</body>
+</html>
